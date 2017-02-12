@@ -21,7 +21,8 @@ RUN apt-get install -y --no-install-recommends \
       libpcre3-dev \
       unzip \
       wget \
-      libssl-dev
+      libssl-dev \
+      ca-certificates
 
 RUN echo "USING NGINX: ${INSTALL_NGINX_VERSION}" && \
       echo "USING PAGESPEED: ${INSTALL_PAGESPEED_VERSION}" && \
@@ -58,16 +59,18 @@ RUN echo "USING NGINX: ${INSTALL_NGINX_VERSION}" && \
         --modules-path=/usr/lib/nginx \
       '
 
-RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
-    ln -sf /dev/stderr /var/log/nginx/error.log && \
-    mkdir -p /var/cache/ngx_pagespeed && \
-    chmod -R o+wr /var/cache/ngx_pagespeed
-
 RUN adduser --system --no-create-home --disabled-login --disabled-password --group nginx
 
-RUN chgrp -R root:nginx /etc/nginx/* && \
-    find /etc/nginx -type d chmod g+rx,g-w,o-rwx {} \; && \
-    find /etc/nginx -type f chmod g+r,g-wx,o-rwx {} \;
+ADD etc/nginx /etc/nginx
+
+RUN mkdir -p /var/log/nginx && \
+    ln -sf /dev/stdout /var/log/nginx/access.log && \
+    ln -sf /dev/stderr /var/log/nginx/error.log && \
+    mkdir -p /var/cache/ngx_pagespeed && \
+    chmod -R o+wr /var/cache/ngx_pagespeed && \
+    chown -R root:nginx /etc/nginx/* && \
+    find /etc/nginx -type d -exec chmod g+rx,g-w,o-rwx {} \; && \
+    find /etc/nginx -type f -exec chmod g+r,g-wx,o-rwx {} \;
 
 CMD sh /etc/nginx/scripts/write_resolvers.sh && \
-    nginx -g 'daemon off;'
+    /usr/sbin/nginx -g 'daemon off;'
