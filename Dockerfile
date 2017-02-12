@@ -58,6 +58,9 @@ RUN echo "USING NGINX: ${INSTALL_NGINX_VERSION}" && \
         --sbin-path=/usr/sbin \
         --modules-path=/usr/lib/nginx \
       '
+RUN apt-get remove -y --auto-remove build-essential
+RUN rm -Rf /root/nginx-*
+RUN rm -Rf /root/ngx_pagespeed-*
 
 RUN adduser --system --no-create-home --disabled-login --disabled-password --group nginx
 
