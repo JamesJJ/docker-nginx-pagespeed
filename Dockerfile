@@ -65,6 +65,7 @@ RUN rm -Rf /root/ngx_pagespeed-*
 RUN adduser --system --no-create-home --disabled-login --disabled-password --group nginx
 
 ADD etc/nginx /etc/nginx
+COPY start-nginx.sh /opt/start-nginx.sh
 
 RUN mkdir -p /var/log/nginx && \
     ln -sf /dev/stdout /var/log/nginx/access.log && \
@@ -73,10 +74,9 @@ RUN mkdir -p /var/log/nginx && \
     chown -R nginx:nginx /var/cache/ngx_pagespeed && \
     chown -R root:nginx /etc/nginx/* && \
     find /etc/nginx -type d -exec chmod g+rx,g-w,o-rwx {} \; && \
-    find /etc/nginx -type f -exec chmod g+r,g-wx,o-rwx {} \;
+    find /etc/nginx -type f -exec chmod g+r,g-wx,o-rwx {} \; && \
+    chown root:root /opt/start-nginx.sh && \
+    chmod 750 /opt/start-nginx.sh
 
-CMD mkdir -p /var/cache/ngx_pagespeed/cache && \
-    find /var/cache/ngx_pagespeed -type d -exec chown nginx:nginx {} \; && \
-    find /var/cache/ngx_pagespeed -type d -exec chmod 750 {} \; && \
-    sh /etc/nginx/scripts/write_resolvers.sh && \
-    /usr/sbin/nginx -g 'daemon off;'
+CMD /opt/start-nginx.sh
+
