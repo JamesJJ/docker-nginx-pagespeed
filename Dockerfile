@@ -70,10 +70,13 @@ RUN mkdir -p /var/log/nginx && \
     ln -sf /dev/stdout /var/log/nginx/access.log && \
     ln -sf /dev/stderr /var/log/nginx/error.log && \
     mkdir -p /var/cache/ngx_pagespeed && \
-    chmod -R o+wr /var/cache/ngx_pagespeed && \
+    chown -R nginx:nginx /var/cache/ngx_pagespeed && \
     chown -R root:nginx /etc/nginx/* && \
     find /etc/nginx -type d -exec chmod g+rx,g-w,o-rwx {} \; && \
     find /etc/nginx -type f -exec chmod g+r,g-wx,o-rwx {} \;
 
-CMD sh /etc/nginx/scripts/write_resolvers.sh && \
+CMD mkdir -p /var/cache/ngx_pagespeed/cache && \
+    find /var/cache/ngx_pagespeed -type d -exec chown nginx:nginx {} \; && \
+    find /var/cache/ngx_pagespeed -type d -exec chmod 750 {} \; && \
+    sh /etc/nginx/scripts/write_resolvers.sh && \
     /usr/sbin/nginx -g 'daemon off;'
